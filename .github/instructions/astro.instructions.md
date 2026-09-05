@@ -120,3 +120,31 @@ There is no Svelte/React layer. When a page genuinely needs client behaviour, ad
 - Minimize client-side JavaScript — the default is zero JS shipped
 - Import and use global CSS styles from layouts
 - Always include a `data-testid` on interactive elements (see `ui.instructions.md`)
+
+## Commenting & Component Documentation
+
+- Comment intent, not mechanics: comments should explain *why* a decision was made or the intent behind non-obvious code, not restate what the code does. Treat outdated or misleading comments as bugs and update or remove them in the same change that touches related code.
+- Document component contracts: every reusable `.astro` component must include a `Props` interface in frontmatter and a short TSDoc comment describing each prop's purpose, expected shape, and whether it is required. Example:
+
+```astro
+---
+/**
+ * Props for GameCard
+ * @param {string} title - visible title shown on the card
+ * @param {import('../types/game').Publisher | null} publisher - publisher summary or null
+ */
+interface Props {
+  title: string;
+  publisher: import('../types/game').Publisher | null;
+}
+const { title, publisher } = Astro.props;
+---
+```
+
+- Keep prop shapes explicit and import shared types from `src/types/` rather than re-declaring them in components.
+- Refer to `drizzle.instructions.md` for function-level documentation expectations (TSDoc/JSDoc) for helpers imported and used in frontmatter.
+
+## TSDoc pointers for pages/components
+
+- Add a one-line summary and `@param`/`@returns` where applicable for exported helpers used by pages. For `.astro` frontmatter, prefer concise inline JSDoc above `interface Props` to document the component API.
+- Avoid excessive comments that restate code; prefer small, focused comments that explain intent, invariants, or cross-file contracts.

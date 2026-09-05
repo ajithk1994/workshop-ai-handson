@@ -59,14 +59,35 @@ export async function getAllGameIds(db: Database): Promise<number[]> {
 
 Seed-derived values must be reproducible across builds. Derive star ratings from a stable hash of the title (`ratingFromTitle`) — **never** `Math.random()`.
 
+## Documentation & Comments (data layer)
+
+- Every exported function in `db/` and `src/lib/` must include a short TSDoc/JSDoc comment describing its purpose, parameters, and return value. Document the `db` parameter for injectable helpers so readers and tests understand how to supply an in-memory client.
+
+Example expectation for a helper:
+
+```ts
+/**
+ * Return all publisher summaries ordered by name.
+ * @param {Database} db - injectable Drizzle database client (use createTestDatabase() in tests)
+ * @returns {Promise<Publisher[]>} ordered publishers
+ */
+export async function getAllPublishers(db: Database): Promise<Publisher[]> { ... }
+```
+
+- Comment *why*, not *what*: explain non-obvious business rules, determinism requirements, or legacy decisions. Remove or update comments that merely restate code.
+- Treat outdated comments as bugs: update or remove them in the same commit that changes the related code.
+
 ## Testing
 
-Unit-test transforms directly and helpers against `createTestDatabase()`. See [`unit-tests.instructions.md`](unit-tests.instructions.md).
+Unit-test transforms directly and helpers against `createTestDatabase()`. See [`unit-tests.instructions.md`](unit-tests.instructions.md). Tests should not rely on comments for behaviour — tests must assert observable behavior and state.
 
 ## Node.js requirement
 
 Node.js 22.13 or later is required because the data layer uses the built-in `node:sqlite` module without an experimental flag. Do not introduce third-party SQLite drivers that ship platform-specific binaries.
 
-## Type checking
+## Type checking & formatting
 
 The data layer (`db/**/*.ts`, `src/lib/*.ts`) is type-checked by `npm run typecheck`, which runs the native **TypeScript 7** compiler (`tsgo`, from `@typescript/native-preview`) against `tsconfig.tsgo.json`. Keep helpers exported with explicit parameter and return types so `tsgo` can verify them. Linting is unaffected — ESLint + `typescript-eslint` still run on the classic `typescript` package.
+
+- Code formatting and stylistic rules (including TypeScript-specific formatting) are enforced by ESLint. When adding new TypeScript rules or formatting expectations, prefer ESLint rules (and existing configs) over ad-hoc scripts.
+- If new formatting or typing rules are required by these standards, add them to the ESLint config and ensure `npm run lint` passes before committing. Use the `quality-checks` skill to run linting and tests together before opening a PR.
